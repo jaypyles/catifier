@@ -31,5 +31,5 @@ runs:
         VERCEL_TOKEN: ${{ inputs.vercel_token }}
       run: |
         cd frontend && npm install -g vercel
-        vercel --prod --token=$VERCEL_TOKEN
+        vercel --prod --token=$VERCEL_TOKEN --yes
       shell: bash

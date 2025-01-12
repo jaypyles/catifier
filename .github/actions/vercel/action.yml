@@ -20,13 +20,16 @@ runs:
 
     - name: Install dependencies
       run: cd frontend && npm install
+      shell: bash
 
     - name: Build project
       run: cd frontend && npm run build
-
+      shell: bash
     - name: Deploy to Vercel
+
       env:
         VERCEL_TOKEN: ${{ inputs.vercel_token }}
       run: |
         cd frontend && npm install -g vercel
         cd frontend && vercel --prod --token=$VERCEL_TOKEN
+      shell: bash

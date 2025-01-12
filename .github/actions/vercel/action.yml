@@ -19,14 +19,14 @@ runs:
         node-version: '22'
 
     - name: Install dependencies
-      run: npm install
+      run: cd frontend && npm install
 
     - name: Build project
-      run: npm run build
+      run: cd frontend && npm run build
 
     - name: Deploy to Vercel
       env:
         VERCEL_TOKEN: ${{ inputs.vercel_token }}
       run: |
-        npm install -g vercel
-        vercel --prod --token=$VERCEL_TOKEN
+        cd frontend && npm install -g vercel
+        cd frontend && vercel --prod --token=$VERCEL_TOKEN

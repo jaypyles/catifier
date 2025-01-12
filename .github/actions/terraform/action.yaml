@@ -13,10 +13,9 @@ runs:
     - uses: actions/checkout@v3
 
     - name: Authenticate to GCP
-      env:
-        GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/gcp-key.json
       run: |
-        echo "${{ inputs.gcp_service_account_key }}" > $GOOGLE_APPLICATION_CREDENTIALS
+        echo "${{ inputs.gcp_service_account_key }}" > ${{ runner.temp }}/gcp-key.json
+        echo "GOOGLE_APPLICATION_CREDENTIALS=${{ runner.temp }}/gcp-key.json" >> $GITHUB_ENV
       shell: bash
 
     - name: Set up Terraform

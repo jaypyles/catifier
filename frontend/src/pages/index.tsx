@@ -16,7 +16,14 @@ export default function ImageGenerator() {
     setIsLoading(true)
     // Simulating image generation
     await new Promise(resolve => setTimeout(resolve, 2000))
-    const newImage = `/placeholder.svg?height=400&width=400&text=${encodeURIComponent(prompt)}`
+    const response = await fetch('/api/generate', {
+      method: 'POST',
+      body: JSON.stringify({ prompt }),
+    })
+
+    const data = await response.json()
+    console.log(`Data: ${data}`)
+    const newImage = data.result
     setCurrentImage(newImage)
     setPreviousImages(prev => [newImage, ...prev.slice(0, 2)])
     setIsLoading(false)
@@ -43,7 +50,11 @@ export default function ImageGenerator() {
           {isLoading ? (
             <Loader2 className="w-16 h-16 animate-spin text-blue-500" />
           ) : currentImage ? (
-            <img src={currentImage} alt="Generated image" className="max-w-full max-h-full object-contain" />
+            <img 
+              src={currentImage} 
+              alt="Generated image" 
+              className="w-full h-full object-cover" 
+            />
           ) : (
             <ImageIcon className="w-16 h-16 text-gray-300" />
           )}
@@ -51,7 +62,11 @@ export default function ImageGenerator() {
         <div className="flex gap-4 justify-center">
           {previousImages.map((img, index) => (
             <div key={index} className="w-24 h-24 bg-white rounded shadow-md flex items-center justify-center">
-              <img src={img} alt={`Previous image ${index + 1}`} className="max-w-full max-h-full object-contain" />
+              <img 
+                src={img} 
+                alt={`Previous image ${index + 1}`} 
+                className="w-full h-full object-cover" 
+              />
             </div>
           ))}
         </div>

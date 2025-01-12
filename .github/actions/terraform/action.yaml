@@ -14,7 +14,7 @@ runs:
 
     - name: Authenticate to GCP
       run: |
-        echo "${{ inputs.gcp_service_account_key }}" > ${{ runner.temp }}/gcp-key.json
+        echo "${{ inputs.gcp_service_account_key }}" | base64 -d > ${{ runner.temp }}/gcp-key.json
         echo "GOOGLE_APPLICATION_CREDENTIALS=${{ runner.temp }}/gcp-key.json" >> $GITHUB_ENV
       shell: bash
 

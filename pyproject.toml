@@ -1,0 +1,29 @@
+[project]
+name = "catifier"
+version = "0.1.0"
+description = "Default template for PDM package"
+authors = [{ name = "Jayden Pyles", email = "jpylesbusiness@gmail.com" }]
+dependencies = [
+    "g4f[all]>=0.4.0.9",
+    "fastapi>=0.115.6",
+]
+requires-python = "==3.12.*"
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[project.scripts]
+catifier = "catifier.__main__:main"
+
+[tool.pdm]
+distribution = true
+
+[tool.pyright]
+reportMissingImports = true
+reportMissingTypeStubs = false
+reportAny = false
+reportUnknownVariableType = false
+reportUnknownMemberType = false
+reportExplicitAny = false
+reportCallInDefaultInitializer = false

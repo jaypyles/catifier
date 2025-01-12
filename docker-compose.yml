@@ -1,0 +1,12 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    command: ./start.sh
+    volumes:
+      - ./catifier-service-account.json:/app/catifier-service-account.json
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/catifier-service-account.json
+    ports:
+      - 8000:8000

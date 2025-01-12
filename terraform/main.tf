@@ -1,3 +1,10 @@
+terraform {
+  backend "gcs" {
+    bucket = "catifier-terraform-state-bucket"
+    prefix = "terraform/state"
+  }
+}
+
 provider "google" {
   project = "catifier"
   region  = "us-central1"

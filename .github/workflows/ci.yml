@@ -2,7 +2,7 @@ on:
   push:
     branches:
       - master
-    workflow_dispatch:
+  workflow_dispatch:
 
 jobs:
   build:
@@ -19,6 +19,11 @@ jobs:
       #     dockerhub_repo: catifier
       #     dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
       #     dockerfile: Dockerfile.backend
+
+      - name: Terraform
+        uses: ./.github/actions/terraform
+        with:
+          gcp_service_account_key: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
 
       - name: Deploy to Vercel
         uses: ./.github/actions/vercel

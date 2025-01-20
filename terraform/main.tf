@@ -60,6 +60,15 @@ resource "google_cloud_run_service" "catifier_service" {
         ports {
           container_port = 8000
         }
+        env {
+          name = "JWT_SECRET"
+          value_from {
+            secret_key_ref {
+              name = "JWT_SECRET"
+              key  = "latest"
+            }
+          }
+        }
       }
       container_concurrency = 1
     }

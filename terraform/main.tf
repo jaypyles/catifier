@@ -30,6 +30,12 @@ resource "google_project_iam_member" "secret_accessor" {
   member  = "serviceAccount:${google_service_account.catifier_service_account.email}"
 }
 
+resource "google_project_iam_member" "compute_secret_accessor" {
+  project = "catifier"
+  role    = "roles/secretmanager.secretAccessor"
+  member  = "serviceAccount:37912683569-compute@developer.gserviceaccount.com"
+}
+
 resource "google_storage_bucket_iam_member" "storage_viewer" {
   bucket = google_storage_bucket.catifier_images.name
   role   = "roles/storage.legacyBucketReader"

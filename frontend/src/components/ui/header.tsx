@@ -4,14 +4,12 @@ import { Menu, X } from "lucide-react";
 import AuthButton from "../auth/button";
 import AuthModal from "../auth/login-modal";
 import { useSession } from "next-auth/react";
-import useUser from "@/hooks/useUser";
 import { CreditBalance } from "./credit-balance";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const { data: session, status } = useSession();
-  const { user } = useUser();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);

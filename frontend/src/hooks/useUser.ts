@@ -6,7 +6,7 @@ const useUser = () => {
   const user = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
 
-  const updateUser = (userData: any) => {
+  const updateUser = (userData: unknown) => {
     dispatch(setUser(userData));
   };
 

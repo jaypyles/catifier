@@ -79,7 +79,7 @@ export default function ImageGenerator() {
 
       setCurrentImage(newImage);
       getPreviousImages();
-    } catch (error) {
+    } catch {
       toast.error("Error generating image");
     } finally {
       setIsLoading(false);

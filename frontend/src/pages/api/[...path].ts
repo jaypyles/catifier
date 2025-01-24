@@ -21,7 +21,7 @@ export default async function handler(
   const headers = new Headers(req.headers as Record<string, string>);
   const body = req.body;
 
-  const forwardPath = Array.isArray(path) ? path.join("/") : path;
+  const forwardPath = Array.isArray(path) ? path.join("/") : `/${path}`;
 
   try {
     let forwardedBody = body;

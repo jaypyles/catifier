@@ -1,32 +1,39 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getToken } from "next-auth/jwt";
-import axios, { AxiosError } from "axios";
+import axios, { AxiosError, AxiosHeaders } from "axios";
+
+const api = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
+});
 
 const getJwt = async (req: NextApiRequest) => {
   return await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 };
 
-const api = axios.create({
-  baseURL: process.env.API_URL,
-});
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  // Get the JWT
   const jwt = await getJwt(req);
 
+  // Get needed objects from client-side request
   const { path } = req.query;
   const method = req.method;
-  const headers = new Headers(req.headers as Record<string, string>);
+  const contentType = req.headers["content-type"] as string;
+  const headers = new AxiosHeaders({
+    "Content-Type": contentType,
+  });
   const body = req.body;
-
   const forwardPath = Array.isArray(path) ? path.join("/") : `/${path}`;
 
   try {
+    // Set request specific items
     let forwardedBody = body;
+
     if (method !== "GET" && method !== "DELETE") {
-      if (headers.get("Content-Type")?.includes("application/json") && body) {
+      const contentType = headers.get("Content-Type") as string;
+      if (contentType?.includes("application/json") && body) {
         forwardedBody = JSON.stringify(body);
       }
     }
@@ -39,26 +46,18 @@ export default async function handler(
       headers.set("Authorization", `Bearer ${jwt.access_token}`);
     }
 
-    const headersObject = Object.fromEntries(headers.entries());
     let response;
-
-    console.log(`api.defaults.baseURL: ${api.defaults.baseURL}`);
-    console.log(`Forwarding request to ${forwardPath}`);
-    console.log(`forwardedBody: ${forwardedBody}`);
-    console.log(`headersObject: ${headersObject}`);
 
     try {
       response = await api.request({
         method: method,
         url: forwardPath,
-        headers: headersObject,
+        headers: headers,
         data: forwardedBody,
       });
     } catch (error: unknown) {
-      console.error("Error forwarding request:", error);
-
       if (error instanceof AxiosError) {
-        console.log(error.response?.headers);
+        // Check if the request is unauthorized and the JWT is expired
         if (
           error.response?.status === 401 &&
           jwt &&
@@ -68,6 +67,7 @@ export default async function handler(
           return;
         }
 
+        // Any other error that may occur
         if (error.response?.status && error.response?.status >= 400) {
           res
             .status(error.response?.status)
@@ -77,18 +77,18 @@ export default async function handler(
       }
     }
 
+    // If the response is not found, return an internal server error
     if (!response) {
-      console.error("No response from API");
       res.status(500).json({ error: "Internal Server Error" });
       return;
     }
 
-    const responseBody = response.data;
+    // Respond to the client
     res.setHeader(
       "Content-Type",
       response.headers["content-type"] || "application/json"
     );
-    res.status(response.status).send(responseBody);
+    res.status(response.status).send(response.data);
   } catch (error) {
     console.error("Error forwarding request:", error);
     res.status(500).json({ error: "Internal Server Error" });

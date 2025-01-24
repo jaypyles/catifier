@@ -3,7 +3,7 @@ import { getToken } from "next-auth/jwt";
 import axios, { AxiosError, AxiosHeaders } from "axios";
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  baseURL: process.env.API_URL,
 });
 
 const getJwt = async (req: NextApiRequest) => {
@@ -60,6 +60,7 @@ export default async function handler(
         `An unexpected error occurred at ${forwardPath} with data: ${forwardedBody}`,
         error
       );
+
       if (error instanceof AxiosError) {
         // Check if the request is unauthorized and the JWT is expired
         if (

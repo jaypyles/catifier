@@ -13,6 +13,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import Image from "next/image";
 
 export default function ImageGenerator() {
   const { user, updateUser } = useUser();
@@ -108,7 +109,7 @@ export default function ImageGenerator() {
           {isLoading ? (
             <Loader2 className="w-16 h-16 animate-spin text-blue-500" />
           ) : currentImage ? (
-            <img
+            <Image
               src={currentImage}
               alt="Generated image"
               className="w-full h-full object-cover rounded-lg"
@@ -123,7 +124,7 @@ export default function ImageGenerator() {
               <CarouselContent>
                 {previousImages.map((img, index) => (
                   <CarouselItem key={index} className="w-12">
-                    <img
+                    <Image
                       src={img}
                       onClick={() => {
                         setCurrentImage(img);

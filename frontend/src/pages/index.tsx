@@ -113,6 +113,8 @@ export default function ImageGenerator() {
               src={currentImage}
               alt="Generated image"
               className="w-full h-full object-cover rounded-lg"
+              width={512}
+              height={512}
             />
           ) : (
             <ImageIcon className="w-16 h-16 text-gray-300" />
@@ -123,7 +125,7 @@ export default function ImageGenerator() {
             <Carousel>
               <CarouselContent>
                 {previousImages.map((img, index) => (
-                  <CarouselItem key={index} className="w-12">
+                  <CarouselItem key={index} className="w-48">
                     <Image
                       src={img}
                       onClick={() => {
@@ -131,6 +133,8 @@ export default function ImageGenerator() {
                       }}
                       alt={`Previous image ${index + 1}`}
                       className="w-full h-full rounded-lg"
+                      width={512}
+                      height={512}
                     />
                   </CarouselItem>
                 ))}

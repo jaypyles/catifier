@@ -42,6 +42,8 @@ export default async function handler(
     const headersObject = Object.fromEntries(headers.entries());
     let response;
 
+    console.log(`Forwarding request to ${forwardPath}`);
+
     try {
       response = await api.request({
         method: method,

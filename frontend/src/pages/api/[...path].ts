@@ -56,7 +56,10 @@ export default async function handler(
         data: forwardedBody,
       });
     } catch (error: unknown) {
-      console.log("An unexpected error occurred:", error);
+      console.log(
+        `An unexpected error occurred at ${forwardPath} with data: ${forwardedBody}`,
+        error
+      );
       if (error instanceof AxiosError) {
         // Check if the request is unauthorized and the JWT is expired
         if (

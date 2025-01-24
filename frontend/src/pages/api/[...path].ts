@@ -50,6 +50,8 @@ export default async function handler(
         data: forwardedBody,
       });
     } catch (error: unknown) {
+      console.error("Error forwarding request:", error);
+
       if (error instanceof AxiosError) {
         console.log(error.response?.headers);
         if (
@@ -71,6 +73,7 @@ export default async function handler(
     }
 
     if (!response) {
+      console.error("No response from API");
       res.status(500).json({ error: "Internal Server Error" });
       return;
     }

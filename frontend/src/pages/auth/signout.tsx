@@ -1,27 +1,27 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { signOut } from 'next-auth/react';
+import { useEffect, useState } from "react";
+import { signOut } from "next-auth/react";
 
 export default function SignOutPage() {
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const signOutApi = async () => {
       try {
         const response = await fetch(`/api/logout`, {
-          method: 'POST',
+          method: "POST",
         });
 
         if (!response.ok) {
-          throw new Error('Failed to log out from the backend');
+          throw new Error("Failed to log out from the backend");
         }
 
-        signOut({ callbackUrl: '/' });
+        signOut({ callbackUrl: "/" });
       } catch (err) {
-        console.error('Error during sign-out API call:', err);
-        setError(err instanceof Error ? err.message : 'Unknown error');
+        console.error("Error during sign-out API call:", err);
+        setError(err instanceof Error ? err.message : "Unknown error");
       } finally {
         setLoading(false);
       }
@@ -32,7 +32,7 @@ export default function SignOutPage() {
 
   if (loading) {
     return (
-      <div style={{ textAlign: 'center', marginTop: '50px' }}>
+      <div style={{ textAlign: "center", marginTop: "50px" }}>
         <h1>Signing you out...</h1>
         <p>Please wait while we log you out.</p>
       </div>
@@ -40,7 +40,7 @@ export default function SignOutPage() {
   }
   if (error) {
     return (
-      <div style={{ textAlign: 'center', marginTop: '50px' }}>
+      <div style={{ textAlign: "center", marginTop: "50px" }}>
         <h1>Failed to sign you out</h1>
         <p>{error}</p>
       </div>

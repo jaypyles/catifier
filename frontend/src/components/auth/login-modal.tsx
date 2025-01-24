@@ -37,6 +37,12 @@ export default function AuthModal({ isOpen, setIsOpen }: AuthModalProps) {
         console.error("Sign-in error:", res.error);
       } else {
         const session = await getSession();
+
+        if (!session?.user) {
+          toast.error("Failed to login");
+          return;
+        }
+
         updateUser({
           username,
           creditBalance: session?.user?.startingCredits,

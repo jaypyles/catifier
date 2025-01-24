@@ -16,6 +16,7 @@ from catifier.auth.utils import (
     create_access_token,
     get_user,
     hash_password,
+    remove_token,
 )
 from catifier.auth.constants import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
@@ -58,9 +59,6 @@ async def login(
         key="access_token",
         value=access_token,
         httponly=True,
-        max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-        expires=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-        samesite="lax",
     )
 
     return response
@@ -69,7 +67,11 @@ async def login(
 @router.post("/logout")
 async def logout_user(token: str = Header(..., alias="Authorization")):
     try:
-        user = get_user(token)
+        try:
+            user = get_user(token)
+        except HTTPException:
+            remove_token(token)  # already expired
+            return {"message": "User logged out successfully"}
 
         if user is None:
             raise HTTPException(status_code=401, detail="Invalid token")

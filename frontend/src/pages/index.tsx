@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Loader2, ImageIcon } from "lucide-react";
+import { ImagesService } from "@/lib/services/images-service";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import useUser from "@/hooks/useUser";
@@ -22,21 +23,11 @@ export default function ImageGenerator() {
   const [currentImage, setCurrentImage] = useState("");
   const [previousImages, setPreviousImages] = useState<string[]>([]);
 
-  const getPreviousImages = async () => {
-    const response = await fetch("/api/images");
-    const data = await response.json();
-
-    if (response.status >= 400) {
-      toast.error(data.error);
-      return;
-    }
-
-    setPreviousImages(data.images);
-  };
-
   useEffect(() => {
     if (session) {
-      getPreviousImages();
+      ImagesService.getPreviousImages().then((images) => {
+        setPreviousImages(images || []);
+      });
     }
   }, [session]);
 
@@ -72,13 +63,17 @@ export default function ImageGenerator() {
       const data = await response.json();
       const newImage = data.image_url;
 
+      console.log(data);
+
       updateUser({
         ...user,
         creditBalance: data.credits,
       });
 
       setCurrentImage(newImage);
-      getPreviousImages();
+      ImagesService.getPreviousImages().then((images) => {
+        setPreviousImages(images || []);
+      });
     } catch {
       toast.error("Error generating image");
     } finally {
@@ -123,24 +118,26 @@ export default function ImageGenerator() {
           )}
         </div>
         <div className="flex gap-4 justify-center">
-          <Carousel>
-            <CarouselContent>
-              {previousImages.map((img, index) => (
-                <CarouselItem key={index} className="w-24">
-                  <img
-                    src={img}
-                    onClick={() => {
-                      setCurrentImage(img);
-                    }}
-                    alt={`Previous image ${index + 1}`}
-                    className="w-full h-full rounded-lg"
-                  />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="text-black" />
-            <CarouselNext className="text-black" />
-          </Carousel>
+          {previousImages.length > 0 && (
+            <Carousel>
+              <CarouselContent>
+                {previousImages.map((img, index) => (
+                  <CarouselItem key={index} className="w-12">
+                    <img
+                      src={img}
+                      onClick={() => {
+                        setCurrentImage(img);
+                      }}
+                      alt={`Previous image ${index + 1}`}
+                      className="w-full h-full rounded-lg"
+                    />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="text-black" />
+              <CarouselNext className="text-black" />
+            </Carousel>
+          )}
         </div>
       </div>
       <div className="absolute inset-0 -z-10 h-full w-full bg-white bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:6rem_4rem]">

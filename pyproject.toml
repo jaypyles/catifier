@@ -31,3 +31,4 @@ reportUnknownVariableType = false
 reportUnknownMemberType = false
 reportExplicitAny = false
 reportCallInDefaultInitializer = false
+reportUnknownArgumentType = false

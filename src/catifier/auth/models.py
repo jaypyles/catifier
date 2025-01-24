@@ -16,7 +16,7 @@ class User(Base):
     username = Column(String, unique=True, index=True)
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
-    credits = Column(Integer, default=10)
+    credits = Column(Integer, default=1)
 
 
 @final

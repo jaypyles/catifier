@@ -1,9 +1,14 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getToken } from "next-auth/jwt";
+import axios, { AxiosError } from "axios";
 
 const getJwt = async (req: NextApiRequest) => {
   return await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 };
+
+const api = axios.create({
+  baseURL: process.env.API_URL,
+});
 
 export default async function handler(
   req: NextApiRequest,
@@ -16,9 +21,7 @@ export default async function handler(
   const headers = new Headers(req.headers as Record<string, string>);
   const body = req.body;
 
-  const apiBaseUrl = process.env.API_URL;
   const forwardPath = Array.isArray(path) ? path.join("/") : path;
-  const forwardUrl = `${apiBaseUrl}/${forwardPath}`;
 
   try {
     let forwardedBody = body;
@@ -36,22 +39,46 @@ export default async function handler(
       headers.set("Authorization", `Bearer ${jwt.access_token}`);
     }
 
-    const response = await fetch(forwardUrl, {
-      method: method,
-      headers: headers,
-      body: forwardedBody,
-    });
+    const headersObject = Object.fromEntries(headers.entries());
+    let response;
 
-    if (!response.ok || response.status >= 400) {
-      const data = await response.json();
-      res.status(response.status).send({ error: `Error: ${data.detail}` });
+    try {
+      response = await api.request({
+        method: method,
+        url: forwardPath,
+        headers: headersObject,
+        data: forwardedBody,
+      });
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        console.log(error.response?.headers);
+        if (
+          error.response?.status === 401 &&
+          jwt &&
+          error.response?.headers["expired"]
+        ) {
+          res.status(307).json({ url: "/auth/signout" });
+          return;
+        }
+
+        if (error.response?.status && error.response?.status >= 400) {
+          res
+            .status(error.response?.status)
+            .send({ error: `Error: ${error.response?.data.detail}` });
+          return;
+        }
+      }
+    }
+
+    if (!response) {
+      res.status(500).json({ error: "Internal Server Error" });
       return;
     }
 
-    const responseBody = await response.json();
+    const responseBody = response.data;
     res.setHeader(
       "Content-Type",
-      response.headers.get("Content-Type") || "application/json"
+      response.headers["content-type"] || "application/json"
     );
     res.status(response.status).send(responseBody);
   } catch (error) {

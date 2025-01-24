@@ -42,7 +42,10 @@ export default async function handler(
     const headersObject = Object.fromEntries(headers.entries());
     let response;
 
+    console.log(`api.defaults.baseURL: ${api.defaults.baseURL}`);
     console.log(`Forwarding request to ${forwardPath}`);
+    console.log(`forwardedBody: ${forwardedBody}`);
+    console.log(`headersObject: ${headersObject}`);
 
     try {
       response = await api.request({

@@ -8,14 +8,18 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    outputs:
+      version: ${{ steps.set_version.outputs.version }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Set version
+        id: set_version
         run: |
-          export VERSION=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 8)
-          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          VERSION=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 8)
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
 
       - name: Build and push Docker image
         uses: ./.github/actions/docker-image
@@ -34,7 +38,7 @@ jobs:
       - name: Test Python
         uses: ./.github/actions/test-python
         with:
-          docker_image: ${{ secrets.DOCKERHUB_USERNAME }}/catifier:${{ env.VERSION }}
+          docker_image: ${{ secrets.DOCKERHUB_USERNAME }}/catifier:${{ needs.build.outputs.version }}
 
   deploy-cloud-resources:
     runs-on: ubuntu-latest
@@ -42,11 +46,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Get version from build job
+        run: |
+          echo "VERSION=${{ needs.build.outputs.version }}" >> $GITHUB_ENV
+
       - name: Terraform
         uses: ./.github/actions/terraform
         with:
           gcp_service_account_key: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
-          image_version: ${{ env.VERSION }}
+          image_version: ${{ needs.build.outputs.version }}
 
   deploy-vercel:
     runs-on: ubuntu-latest
@@ -71,7 +79,7 @@ jobs:
           webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }}
           username: "Catifier CI"
           embed-title: "Release"
-          embed-description: "🚀 ${{ github.actor }} deployed `${{ github.repository }}.v${{ env.VERSION }}`"
+          embed-description: "🚀 ${{ github.actor }} deployed `${{ github.repository }}.v${{ needs.build.outputs.version }}`"
           embed-color: 0x00A6FF
           embed-url: ${{ secrets.VERCEL_URL }}
           embed-footer-text: "Catifier"

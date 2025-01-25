@@ -16,6 +16,7 @@ from catifier.auth.utils import (
     authenticate_user,
     create_access_token,
     get_user,
+    get_user_from_token,
     hash_password,
     remove_token,
 )
@@ -98,6 +99,18 @@ async def create_api_key(
     db.commit()
 
     return {"message": "API key created successfully", "api_key": api_key}
+
+
+@router.get("/api-key")
+async def get_api_key(
+    user: User = Depends(get_user_from_token), db: Session = Depends(get_db)
+):
+    api_key = db.query(APIKey).filter(APIKey.user_id == user.id).first()
+
+    if api_key is None:
+        raise HTTPException(status_code=404, detail="API key not found")
+
+    return {"message": "API key retrieved successfully", "api_key": api_key.api_key}
 
 
 @router.post("/register")

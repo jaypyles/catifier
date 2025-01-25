@@ -17,6 +17,7 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
     credits = Column(Integer, default=1)
+    api_key_id = Column(Integer, ForeignKey("api_key.id"))
 
 
 @final

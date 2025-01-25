@@ -4,7 +4,7 @@ from catifier.tests.conftest import client
 from unittest.mock import patch
 import uuid
 
-from catifier.tests.utils.database import register
+from catifier.tests.utils.database import create_api_key, login, register
 
 
 class TestRegister:
@@ -43,14 +43,15 @@ class TestLogin:
         assert response.json() == {"detail": "Invalid username or password"}
 
 
+@freeze_time("2023-01-01")
 class TestApiKey:
-    @freeze_time("2023-01-01")
     def test_create_api_key(self):
         register(client, "test_create_api_key_user", "test")
         response = client.post(
             "/login",
             data={"username": "test_create_api_key_user", "password": "test"},
         )
+
         access_token = response.headers["Set-Cookie"].split("=")[1].split(";")[0]
 
         mock_uuid = uuid.UUID("12345678123456781234567812345678")
@@ -64,3 +65,19 @@ class TestApiKey:
                 "message": "API key created successfully",
                 "api_key": mock_uuid.hex,
             }
+
+    def test_get_api_key(self):
+        username = "test_get_api_key_user"
+        register(client, username, "test")
+        api_key = create_api_key(client, username, "test")
+        access_token = login(client, username, "test")
+
+        response = client.get(
+            "/api-key", headers={"Authorization": f"Bearer {access_token}"}
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "message": "API key retrieved successfully",
+            "api_key": api_key,
+        }

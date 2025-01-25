@@ -5,7 +5,7 @@ from fastapi import HTTPException, Header
 from fastapi.responses import JSONResponse
 import jwt
 from sqlalchemy.orm import Session
-from catifier.auth.models import Blacklist, User
+from catifier.auth.models import APIKey, Blacklist, User
 from catifier.auth.database import get_db
 from datetime import datetime, timedelta
 from fastapi.security import OAuth2PasswordBearer
@@ -144,7 +144,16 @@ def get_user_from_access_token(access_token: str) -> User:
 
 def get_user_from_api_key(api_key: str) -> User:
     db = next(get_db())
-    user = db.query(User).filter(User.api_key == api_key).first()
+    api_key = db.query(APIKey).filter(APIKey.api_key == api_key).first()
+
+    if api_key is None:
+        raise HTTPException(status_code=401, detail="Invalid API key")
+
+    user = db.query(User).filter(User.id == api_key.user_id).first()
+
+    if user is None:
+        raise HTTPException(status_code=401, detail="Invalid API key")
+
     return user
 
 

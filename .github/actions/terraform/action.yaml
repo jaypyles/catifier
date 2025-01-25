@@ -6,6 +6,9 @@ inputs:
   gcp_service_account_key:
     description: The GCP service account key
     required: true
+  image_version:
+    description: The image version
+    required: true
 
 runs:
   using: composite
@@ -17,6 +20,7 @@ runs:
         echo "${{ inputs.gcp_service_account_key }}" | base64 -d > ${{ runner.temp }}/gcp-key.json
         export GOOGLE_APPLICATION_CREDENTIALS="${{ runner.temp }}/gcp-key.json"
         echo "GOOGLE_APPLICATION_CREDENTIALS=${{ runner.temp }}/gcp-key.json" >> $GITHUB_ENV
+        export TF_VAR_image_version=${{ inputs.image_tag }}
       shell: bash
 
     - name: Set up Terraform

@@ -14,11 +14,9 @@ jobs:
 
       - name: Set version
         run: |
-          echo "VERSION=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 8)" >> $GITHUB_ENV
-
-      - name: Set Terraform variable
-        run: |
-          echo "TF_VAR_image_version=${{ env.VERSION }}" >> $GITHUB_ENV
+          export VERSION=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 8)
+          echo "::set-output name=version::${VERSION}"
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
       - name: Build and push Docker image
         uses: ./.github/actions/docker-image
@@ -37,11 +35,11 @@ jobs:
       - name: Test Python
         uses: ./.github/actions/test-python
         with:
-          docker_image: ${{ secrets.DOCKERHUB_USERNAME }}/catifier:${{ env.VERSION }}
+          docker_image: ${{ secrets.DOCKERHUB_USERNAME }}/catifier:${{ needs.build.outputs.version }}
 
   deploy-cloud-resources:
     runs-on: ubuntu-latest
-    needs: [test]
+    needs: [build, test]
     steps:
       - uses: actions/checkout@v4
 
@@ -49,6 +47,7 @@ jobs:
         uses: ./.github/actions/terraform
         with:
           gcp_service_account_key: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+          image_version: ${{ needs.build.outputs.version }}
 
   deploy-vercel:
     runs-on: ubuntu-latest

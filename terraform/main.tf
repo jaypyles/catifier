@@ -51,12 +51,11 @@ resource "google_cloud_run_service" "catifier_service" {
     metadata {
       annotations = {
         "autoscaling.knative.dev/maxScale" = "1"
-        "dummy-annotation"                 = "${timestamp()}"
       }
     }
     spec {
       containers {
-        image   = "docker.io/jpyles0524/catifier:latest"
+        image   = "docker.io/jpyles0524/catifier:${env("VERSION")}"
         command = ["./start.sh"]
         ports {
           container_port = 8000

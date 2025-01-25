@@ -5,7 +5,7 @@ _ = load_dotenv()
 
 
 def get_secret():
-    return os.getenv("JWT_SECRET")
+    return os.getenv("JWT_SECRET", "")
 
 
 ALGORITHM = "HS256"

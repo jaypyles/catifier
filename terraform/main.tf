@@ -23,7 +23,6 @@ resource "google_storage_bucket" "catifier_images" {
 }
 
 # Service Account
-
 resource "google_service_account" "catifier_service_account" {
   account_id   = "catifier-service-account"
   display_name = "Catifier Service Account"

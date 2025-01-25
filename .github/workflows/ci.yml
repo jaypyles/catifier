@@ -15,6 +15,7 @@ jobs:
       - name: Set version
         run: |
           echo "VERSION=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 8)" >> $GITHUB_ENV
+          echo "TF_VAR_image_version=${{ env.VERSION }}" >> $GITHUB_ENV
 
       - name: Build and push Docker image
         uses: ./.github/actions/docker-image

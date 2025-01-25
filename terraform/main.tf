@@ -5,6 +5,11 @@ terraform {
   }
 }
 
+variable "image_version" {
+  description = "The version of the container image to deploy"
+  type        = string
+}
+
 provider "google" {
   project = "catifier"
   region  = "us-central1"
@@ -55,7 +60,7 @@ resource "google_cloud_run_service" "catifier_service" {
     }
     spec {
       containers {
-        image   = "docker.io/jpyles0524/catifier:${env("VERSION")}"
+        image   = "docker.io/jpyles0524/catifier:${var.image_version}"
         command = ["./start.sh"]
         ports {
           container_port = 8000

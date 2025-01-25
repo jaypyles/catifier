@@ -14,7 +14,7 @@ jobs:
 
       - name: Set version
         run: |
-          echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+          echo "sha_short=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 8)" >> $GITHUB_ENV
 
       - name: Build and push Docker image
         uses: ./.github/actions/docker-image

@@ -1,7 +1,6 @@
 import hashlib
-from typing import Any
+from typing import Any, cast
 
-from aiohttp import content_disposition_filename
 from fastapi import HTTPException, Header
 from fastapi.responses import JSONResponse
 import jwt
@@ -14,6 +13,7 @@ from functools import wraps
 from typing import Callable, TypeVar
 
 
+from catifier.logger import LOG
 from catifier.auth.constants import SECRET, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -34,6 +34,10 @@ def requires_credit(func: F) -> F:
 
         if user is None:
             raise HTTPException(status_code=401, detail="Invalid token")
+
+        user = cast(User, user)
+
+        LOG.info(f"User: {user.username}, has {user.credits} credits")
 
         if user.credits == 0:
             raise HTTPException(status_code=403, detail="User has no credits")

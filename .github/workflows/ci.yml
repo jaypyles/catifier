@@ -20,6 +20,7 @@ jobs:
         run: |
           VERSION=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 8)
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
 
       - name: Build and push Docker image
         uses: ./.github/actions/docker-image

@@ -133,9 +133,11 @@ def get_user_from_access_token(access_token: str) -> User:
             headers={"expired": "true"},
         ) from e
 
-    user = User(
-        id=decoded["id"], username=decoded["username"], credits=decoded["credits"]
-    )
+    db = next(get_db())
+    user = db.query(User).filter(User.id == decoded["id"]).first()
+
+    if user is None:
+        raise HTTPException(status_code=401, detail="Invalid token")
 
     return user
 

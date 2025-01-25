@@ -182,7 +182,6 @@ def create_access_token(
 
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, get_secret(), algorithm=ALGORITHM)
-    print(f"GET SECRET: {get_secret()}")
 
     return encoded_jwt
 
@@ -191,8 +190,6 @@ async def get_user_from_token(
     token: str | None = Header(None, alias="Authorization"),
     api_key: str | None = Header(None, alias="X-API-Key"),
 ) -> User:
-    LOG.info(f"Token: {token}, API Key: {api_key}")
-
     if not token and not api_key:
         raise HTTPException(status_code=401, detail="Missing token or API key")
 

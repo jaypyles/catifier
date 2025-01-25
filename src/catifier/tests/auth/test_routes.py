@@ -1,25 +1,25 @@
 from freezegun import freeze_time
-from fastapi.testclient import TestClient
-from catifier.app import app
+from catifier.tests.conftest import client
 
 from unittest.mock import patch
 import uuid
 
-
-client = TestClient(app)
+from catifier.tests.utils.database import register
 
 
 class TestRegister:
     def test_register_user(self):
         response = client.post(
-            "/register", json={"username": "test", "password": "test"}
+            "/register", json={"username": "test_register_user", "password": "test"}
         )
+
         assert response.status_code == 200
         assert response.json() == {"message": "User registered successfully"}
 
     def test_failed_register_user(self):
+        register(client, "test_register_user", "test")
         response = client.post(
-            "/register", json={"username": "test", "password": "test"}
+            "/register", json={"username": "test_register_user", "password": "test"}
         )
         assert response.status_code == 400
         assert response.json() == {"detail": "User with this username already exists"}
@@ -27,12 +27,18 @@ class TestRegister:
 
 class TestLogin:
     def test_login(self):
-        response = client.post("/login", data={"username": "test", "password": "test"})
+        register(client, "test_login_user", "test")
+        response = client.post(
+            "/login", data={"username": "test_login_user", "password": "test"}
+        )
         assert response.status_code == 200
         assert response.json() == {"message": "User logged in successfully"}
 
     def test_failed_login(self):
-        response = client.post("/login", data={"username": "test", "password": "wrong"})
+        register(client, "test_failed_login_user", "test")
+        response = client.post(
+            "/login", data={"username": "test_failed_login_user", "password": "wrong"}
+        )
         assert response.status_code == 401
         assert response.json() == {"detail": "Invalid username or password"}
 
@@ -40,7 +46,11 @@ class TestLogin:
 class TestApiKey:
     @freeze_time("2023-01-01")
     def test_create_api_key(self):
-        response = client.post("/login", data={"username": "test", "password": "test"})
+        register(client, "test_create_api_key_user", "test")
+        response = client.post(
+            "/login",
+            data={"username": "test_create_api_key_user", "password": "test"},
+        )
         access_token = response.headers["Set-Cookie"].split("=")[1].split(";")[0]
 
         mock_uuid = uuid.UUID("12345678123456781234567812345678")

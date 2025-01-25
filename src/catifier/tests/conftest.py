@@ -8,15 +8,11 @@ from collections.abc import Generator
 from catifier.app import app
 from catifier.auth.database import Base, get_db
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
-
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
+engine = create_engine("sqlite:///test.db")
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-def override_get_db() -> Generator[Session, None, None]:
+def db_session() -> Generator[Session, None, None]:
     db = TestingSessionLocal()
     try:
         yield db
@@ -24,20 +20,37 @@ def override_get_db() -> Generator[Session, None, None]:
         db.close()
 
 
-app.dependency_overrides[get_db] = override_get_db
-
 client = TestClient(app)
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="function", autouse=True)
+def override_get_db():
+    app.dependency_overrides[get_db] = db_session
+    yield
+    _ = app.dependency_overrides.pop(get_db, None)
+
+
+@pytest.fixture(scope="function", autouse=True)
 def mock_getenv():
-    with patch("catifier.auth.utils.get_secret", return_value="new_test_secret"):
+    with patch("catifier.auth.utils.get_db", side_effect=db_session):
         yield
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="function", autouse=True)
+def mock_router_get_db():
+    with patch("catifier.auth.router.get_db", side_effect=db_session):
+        yield
+
+
+@pytest.fixture(scope="function", autouse=True)
+def mock_app_get_db():
+    with patch("catifier.app.get_db", side_effect=db_session):
+        yield
+
+
+@pytest.fixture(scope="function", autouse=True)
 def setup_database():
     Base.metadata.create_all(bind=engine)
-    print("Database setup")
+
     yield
     Base.metadata.drop_all(bind=engine)

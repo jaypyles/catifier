@@ -33,7 +33,7 @@ runs:
       shell: bash
 
     - name: Terraform Plan
-      run: cd terraform && terraform plan --time
+      run: cd terraform && terraform plan
       shell: bash
 
     - name: Terraform Apply

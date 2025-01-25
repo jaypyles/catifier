@@ -5,6 +5,7 @@ import AuthButton from "../auth/button";
 import AuthModal from "../auth/login-modal";
 import { useSession } from "next-auth/react";
 import { CreditBalance } from "./credit-balance";
+import Image from "next/image";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -25,10 +26,12 @@ const Header = () => {
         <div className="flex justify-between items-center py-4 md:justify-start md:space-x-10">
           <div className="flex justify-start lg:w-0 lg:flex-1">
             <Link href="/" className="text-xl font-bold text-gray-800">
-              <img
+              <Image
                 src="/images/logo.jpg"
                 alt="Logo"
                 className="w-10 h-10 rounded-full"
+                width={40}
+                height={40}
               />
             </Link>
           </div>

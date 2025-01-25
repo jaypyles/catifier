@@ -28,12 +28,44 @@ jobs:
           dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
           dockerfile: Dockerfile.backend
 
+  test:
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - name: Test Python
+        uses: ./.github/actions/test-python
+        with:
+          docker_image: ${{ secrets.DOCKERHUB_USERNAME }}/catifier:${{ env.VERSION }}
+
+  deploy-cloud-resources:
+    runs-on: ubuntu-latest
+    needs: [test]
+    steps:
       - name: Terraform
         uses: ./.github/actions/terraform
         with:
           gcp_service_account_key: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
 
+  deploy-vercel:
+    runs-on: ubuntu-latest
+    needs: [deploy-cloud-resources]
+    steps:
       - name: Deploy to Vercel
         uses: ./.github/actions/vercel
         with:
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
+
+  send-discord-message:
+    runs-on: ubuntu-latest
+    needs: [deploy-cloud-resources, deploy-vercel]
+    steps:
+      - name: Send Discord Message
+        uses: ./.github/actions/discord-message
+        with:
+          webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          username: "Catifier CI"
+          embed-title: "Release"
+          embed-description: "🚀 ${{ github.actor }} deployed `${{ github.repository }}.v${{ env.VERSION }}`"
+          embed-color: 0x00A6FF
+          embed-url: ${{ secrets.VERCEL_URL }}
+          embed-footer-text: "Catifier"

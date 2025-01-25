@@ -74,6 +74,7 @@ export default async function handler(
 
         // Any other error that may occur
         if (error.response?.status && error.response?.status >= 400) {
+          console.error(error.response?.data.detail);
           res
             .status(error.response?.status)
             .send({ error: `Error: ${error.response?.data.detail}` });

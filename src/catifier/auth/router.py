@@ -6,9 +6,10 @@ import sqlalchemy
 from sqlalchemy.orm import Session
 from datetime import timedelta
 import jwt
+import uuid
 
 from catifier.auth.database import get_db
-from catifier.auth.models import User, CatifierUser
+from catifier.auth.models import User, CatifierUser, APIKey
 from catifier.auth.utils import (
     blacklist_token,
     expire_token,
@@ -34,8 +35,8 @@ async def login(
 
     if not user:
         raise HTTPException(
-            status_code=400,
-            detail="Incorrect username or password",
+            status_code=401,
+            detail="Invalid username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -68,7 +69,7 @@ async def login(
 async def logout_user(token: str = Header(..., alias="Authorization")):
     try:
         try:
-            user = get_user(token)
+            user = get_user(token, None)
         except HTTPException:
             remove_token(token)  # already expired
             return {"message": "User logged out successfully"}
@@ -83,6 +84,20 @@ async def logout_user(token: str = Header(..., alias="Authorization")):
     expire_token(token)
 
     return {"message": "User logged out successfully"}
+
+
+@router.put("/create-api-key")
+async def create_api_key(
+    token: str = Header(..., alias="Authorization"), db: Session = Depends(get_db)
+):
+    api_key = uuid.uuid4().hex
+    user = get_user(token, None)
+
+    new_api_key = APIKey(user_id=user.id, api_key=api_key)
+    db.add(new_api_key)
+    db.commit()
+
+    return {"message": "API key created successfully", "api_key": api_key}
 
 
 @router.post("/register")

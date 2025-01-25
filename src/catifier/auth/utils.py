@@ -14,7 +14,7 @@ from typing import Callable, TypeVar
 
 
 from catifier.logger import LOG
-from catifier.auth.constants import SECRET, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
+from catifier.auth.constants import get_secret, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -112,7 +112,7 @@ def is_expired(jti: str):
     return blacklist is not None and blacklist.expires_at > datetime.now()
 
 
-def get_user(access_token: str) -> User:
+def get_user_from_access_token(access_token: str) -> User:
     access_token = access_token.split(" ")[1] if " " in access_token else access_token
     is_token_expired = is_expired(access_token)
 
@@ -124,7 +124,7 @@ def get_user(access_token: str) -> User:
         )
 
     try:
-        decoded = jwt.decode(access_token, SECRET, algorithms=[ALGORITHM])
+        decoded = jwt.decode(access_token, get_secret(), algorithms=[ALGORITHM])
 
     except jwt.exceptions.InvalidTokenError as e:
         raise HTTPException(
@@ -138,6 +138,21 @@ def get_user(access_token: str) -> User:
     )
 
     return user
+
+
+def get_user_from_api_key(api_key: str) -> User:
+    db = next(get_db())
+    user = db.query(User).filter(User.api_key == api_key).first()
+    return user
+
+
+def get_user(access_token: str | None, api_key: str | None) -> User:
+    if access_token:
+        return get_user_from_access_token(access_token)
+    elif api_key:
+        return get_user_from_api_key(api_key)
+    else:
+        raise HTTPException(status_code=401, detail="Missing token or API key")
 
 
 def hash_password(password: str) -> str:
@@ -164,16 +179,22 @@ def create_access_token(
         expire = datetime.now() + expires_delta
 
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, get_secret(), algorithm=ALGORITHM)
+    print(f"GET SECRET: {get_secret()}")
 
     return encoded_jwt
 
 
-async def get_user_from_token(token: str = Header(..., alias="Authorization")) -> User:
-    if not token:
-        raise HTTPException(status_code=401, detail="Authorization token is missing")
+async def get_user_from_token(
+    token: str | None = Header(None, alias="Authorization"),
+    api_key: str | None = Header(None, alias="X-API-Key"),
+) -> User:
+    LOG.info(f"Token: {token}, API Key: {api_key}")
 
-    user = get_user(token)
+    if not token and not api_key:
+        raise HTTPException(status_code=401, detail="Missing token or API key")
+
+    user = get_user(token, api_key)
 
     if not user:
         raise HTTPException(status_code=401, detail="Invalid token")

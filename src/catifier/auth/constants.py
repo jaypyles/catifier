@@ -3,6 +3,10 @@ from dotenv import load_dotenv
 
 _ = load_dotenv()
 
-SECRET = os.environ["JWT_SECRET"]
+
+def get_secret():
+    return os.getenv("JWT_SECRET")
+
+
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 120

@@ -1,0 +1,81 @@
+name: Send Discord Message
+
+description: Send a message to a Discord channel.
+
+inputs:
+  webhook-url:
+    description: Webhook URL from Discord. 
+    required: true
+  content:
+    description: Message that is sent via the webhook.
+    required: false
+  username:
+    description: The username that should appear to send the message.
+    required: false
+  avatar-url:
+    description: URL for the avatar that should appear with the message.
+    required: false
+  embed-title:
+    description: Title for embed.
+    required: false
+  embed-url:
+    description: URL for embed.
+    required: false
+  embed-description:
+    description: Description for embed.
+    required: false
+  embed-timestamp:
+    description: Timestamp for embed (ISO8601 format).
+    required: false
+  embed-color:
+    description: Color for embed (integer).
+    required: false
+  embed-footer-text:
+    description: Text content for embed footer.
+    required: false
+  embed-footer-icon-url:
+    description: Icon URL for embed footer.
+    required: false
+  embed-image-url:
+    description: Embed image URL.
+    required: false
+  embed-thumbnail-url:
+    description: Embed Thumbnail URL.
+    required: false
+  embed-author-name:
+    description: Embed Author Name.
+    required: false
+  embed-author-url:
+    description: Embed Author URL.
+    required: false
+  embed-author-icon-url:
+    description: Embed Author Icon URL.
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Send Discord Message
+      run: |
+        echo "Sending message to Discord"
+      shell: bash
+
+    - name: Discord Webhook Action
+      uses: tsickert/discord-webhook@v6.0.0
+      with:
+        webhook-url: ${{ inputs.webhook-url }}
+        content: ${{ inputs.content }}
+        username: ${{ inputs.username }}
+        avatar-url: ${{ inputs.avatar-url }}
+        embed-title: ${{ inputs.embed-title }}
+        embed-url: ${{ inputs.embed-url }}
+        embed-description: ${{ inputs.embed-description }}
+        embed-timestamp: ${{ inputs.embed-timestamp }}
+        embed-color: ${{ inputs.embed-color }}
+        embed-footer-text: ${{ inputs.embed-footer-text }}
+        embed-footer-icon-url: ${{ inputs.embed-footer-icon-url }}
+        embed-image-url: ${{ inputs.embed-image-url }}
+        embed-thumbnail-url: ${{ inputs.embed-thumbnail-url }}
+        embed-author-name: ${{ inputs.embed-author-name }}
+        embed-author-url: ${{ inputs.embed-author-url }}
+        embed-author-icon-url: ${{ inputs.embed-author-icon-url }}

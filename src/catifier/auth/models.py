@@ -20,6 +20,14 @@ class User(Base):
 
 
 @final
+class APIKey(Base):
+    __tablename__ = "api_key"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("user.id"))
+    api_key = Column(String)
+
+
+@final
 class Image(Base):
     __tablename__ = "image"
     id = Column(Integer, primary_key=True, index=True)

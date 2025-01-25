@@ -32,6 +32,8 @@ export async function fetch<T>(
       if (error.response?.status === 307) {
         window.location.href = error.response.data.url;
         return null;
+      } else {
+        console.error(JSON.stringify(error.response?.data.error, null, 2));
       }
     }
 

@@ -39,6 +39,9 @@ export default function ImageGenerator() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const userPrompt = prompt.trim();
+
+    setPrompt("");
     setIsLoading(true);
 
     try {
@@ -47,7 +50,7 @@ export default function ImageGenerator() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ prompt: userPrompt }),
       });
 
       if (response.status >= 400) {
@@ -58,8 +61,6 @@ export default function ImageGenerator() {
 
       const data = await response.json();
       const newImage = data.image_url;
-
-      console.log(data);
 
       updateUser({
         ...user,
@@ -94,8 +95,12 @@ export default function ImageGenerator() {
               onChange={(e) => setPrompt(e.target.value)}
               placeholder="Enter your image prompt"
               className="flex-grow"
+              disabled={isLoading || user.creditBalance === 0}
             />
-            <Button type="submit" disabled={isLoading}>
+            <Button
+              type="submit"
+              disabled={isLoading || !prompt.trim() || user.creditBalance === 0}
+            >
               Generate
             </Button>
           </div>

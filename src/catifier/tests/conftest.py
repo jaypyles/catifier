@@ -31,12 +31,6 @@ def override_get_db():
 
 
 @pytest.fixture(scope="function", autouse=True)
-def mock_getenv():
-    with patch("catifier.auth.utils.get_db", side_effect=db_session):
-        yield
-
-
-@pytest.fixture(scope="function", autouse=True)
 def mock_router_get_db():
     with patch("catifier.auth.router.get_db", side_effect=db_session):
         yield
@@ -45,6 +39,20 @@ def mock_router_get_db():
 @pytest.fixture(scope="function", autouse=True)
 def mock_app_get_db():
     with patch("catifier.app.get_db", side_effect=db_session):
+        yield
+
+
+@pytest.fixture(scope="function", autouse=True)
+def mock_user_manager_get_db():
+    with patch(
+        "catifier.auth.user_manager.user_manager.get_db", side_effect=db_session
+    ):
+        yield
+
+
+@pytest.fixture(scope="function", autouse=True)
+def mock_jwt_handler_get_db():
+    with patch("catifier.auth.jwt_handler.jwt_handler.get_db", side_effect=db_session):
         yield
 
 

@@ -1,13 +1,12 @@
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from catifier.logger import LOG
 from catifier.ai import generate_image_from_prompt
 from catifier.auth.database import get_db
 from catifier.auth.models import Image, User
-from catifier.auth.utils import (
-    get_user_from_token,
-    requires_credit,
-)
+from catifier.auth.user_manager.user_manager import UserManager
+from catifier.auth.decorators import requires_credit
 from catifier.storage import clear_images_from_bucket
 from pydantic import BaseModel
 from catifier.auth.router import router as auth_router
@@ -35,10 +34,10 @@ class GenerateRequest(BaseModel):
 
 
 @app.post("/generate")
-@requires_credit
+@requires_credit()
 async def generate_image(
     request: GenerateRequest,
-    user: User = Depends(get_user_from_token),
+    user: User = Depends(UserManager.get_user_from_header),
 ):
     try:
         image_url = await generate_image_from_prompt(request.prompt)
@@ -58,7 +57,7 @@ async def generate_image(
 
 @app.get("/images")
 def list_images(
-    user: User = Depends(get_user_from_token),
+    user: User = Depends(UserManager.get_user_from_header),
 ):
     try:
         db = next(get_db())

@@ -16,6 +16,6 @@ def login(client: TestClient, username: str, password: str):
 def create_api_key(client: TestClient, username: str, password: str):
     access_token = login(client, username, password)
     response = client.put(
-        "/create-api-key", headers={"Authorization": f"Bearer {access_token}"}
+        "/api-key", headers={"Authorization": f"Bearer {access_token}"}
     )
     return response.json()["api_key"]

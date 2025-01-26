@@ -2,13 +2,14 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy import create_engine
 from collections.abc import Generator
+import os
 
 from dotenv import load_dotenv
 
 _ = load_dotenv()
 
 
-DATABASE_URL = "sqlite:///catifier.db"
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 engine = create_engine(
     DATABASE_URL,

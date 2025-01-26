@@ -57,7 +57,7 @@ class TestApiKey:
         mock_uuid = uuid.UUID("12345678123456781234567812345678")
         with patch("uuid.uuid4", return_value=mock_uuid):
             response = client.put(
-                "/create-api-key", headers={"Authorization": f"Bearer {access_token}"}
+                "/api-key", headers={"Authorization": f"Bearer {access_token}"}
             )
 
             assert response.status_code == 200
@@ -81,3 +81,28 @@ class TestApiKey:
             "message": "API key retrieved successfully",
             "api_key": api_key,
         }
+
+    def test_delete_api_key(self):
+        username = "test_delete_api_key_user"
+        register(client, username, "test")
+        _ = create_api_key(client, username, "test")
+        access_token = login(client, username, "test")
+
+        response = client.delete(
+            "/api-key", headers={"Authorization": f"Bearer {access_token}"}
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {"message": "API key deleted successfully"}
+
+    def test_failed_delete_api_key(self):
+        username = "test_failed_delete_api_key_user"
+        register(client, username, "test")
+        access_token = login(client, username, "test")
+
+        response = client.delete(
+            "/api-key", headers={"Authorization": f"Bearer {access_token}"}
+        )
+
+        assert response.status_code == 500
+        assert response.json() == {"detail": "Error deleting API key"}

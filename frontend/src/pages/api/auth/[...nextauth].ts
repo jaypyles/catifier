@@ -12,6 +12,9 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
   },
+  pages: {
+    signOut: "/auth/signout",
+  },
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -29,6 +32,10 @@ export const authOptions: NextAuthOptions = {
           }).toString(),
           credentials: "include",
         });
+
+        if (response.status === 401) {
+          throw new Error("Invalid credentials");
+        }
 
         const access_token = response.headers
           .get("Set-Cookie")

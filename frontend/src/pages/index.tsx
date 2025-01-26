@@ -14,6 +14,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import Image from "next/image";
+import LandingPage from "@/components/pages/landing-page";
 
 export default function ImageGenerator() {
   const { user, updateUser } = useUser();
@@ -33,13 +34,7 @@ export default function ImageGenerator() {
   }, [session]);
 
   if (!session) {
-    return (
-      <div className="flex flex-col flex-grow bg-gradient-to-r from-blue-100 to-purple-100 text-black">
-        <div className="flex-grow flex flex-col items-center justify-center p-4 text-2xl font-bold">
-          <p>Must login to generate images</p>
-        </div>
-      </div>
-    );
+    return <LandingPage />;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {

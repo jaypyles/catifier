@@ -126,11 +126,19 @@ def get_user_from_access_token(access_token: str) -> User:
     try:
         decoded = jwt.decode(access_token, get_secret(), algorithms=[ALGORITHM])
 
-    except jwt.exceptions.InvalidTokenError as e:
+    except jwt.exceptions.ExpiredSignatureError as e:
+        LOG.warning(f"Error: {e}")
         raise HTTPException(
             status_code=401,
-            detail="Invalid token or expired",
+            detail="Token expired",
             headers={"expired": "true"},
+        ) from e
+
+    except jwt.exceptions.InvalidTokenError as e:
+        LOG.warning(f"Error: {e}")
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid token",
         ) from e
 
     db = next(get_db())
@@ -190,7 +198,6 @@ def create_access_token(
         expire = datetime.now() + expires_delta
 
     to_encode.update({"exp": expire})
-    print(f"SECRET: {get_secret()}")
     encoded_jwt = jwt.encode(to_encode, get_secret(), algorithm=ALGORITHM)
 
     return encoded_jwt

@@ -34,7 +34,11 @@ export default function AuthModal({ isOpen, setIsOpen }: AuthModalProps) {
       });
 
       if (res?.error) {
-        console.error("Sign-in error:", res.error);
+        if (res.error === "Invalid credentials") {
+          toast.error("Invalid credentials");
+        } else {
+          toast.error("Something went wrong. Try again.");
+        }
       } else {
         const session = await getSession();
 
